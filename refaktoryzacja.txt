@@ -1,0 +1,104 @@
+Plik main.cpp
+
+/*-----------------------------------------------------------------------------+
+|                                  InitApp                                     |
++------------------------------------------------------------------------------+
+| Description:																   |
+|    Initialises all of the application.                                       | 
++-----------------------------------------------------------------------------*/
+void InitApp(const CLog& logger, AppState& appState) {
+	CGLApp::m_iBpp = 32;
+	CGLApp::m_iWidth = 1024;
+	CGLApp::m_iHeight = 768;
+	CGLApp::m_bFullscreen = false;
+	sprintf_s(CGLApp::m_szTitle, "ViAlg");
+	
+	if (!g_glApp.Init(IDR_MENU1, &OnMenuCommand)) throw std::runtime_error("Failed in initialising the Application");
+	else logger.AddMsg(LogMode::Success, "Main window of the application has been created!");
+
+	g_glApp.s_param = &appState;
+
+	if (!g_Timer.Init()) throw std::runtime_error("High Performance Timer not available!");
+	else logger.AddMsg(LogMode::Success, "High Performance Timer available!");
+
+	//g_glApp.SetRenderProc(&RenderScene);
+
+    BuildSinCosTables();
+	srand((unsigned int)time(NULL));
+
+	g_iTexFloor = LoadTextureFromBmp("data\\checker64.bmp", GL_BGR_EXT, GL_LINEAR_MIPMAP_LINEAR);
+	g_iTexFrame = LoadTextureFromBmp("data\\frame.bmp", GL_BGR_EXT, GL_LINEAR_MIPMAP_LINEAR);
+
+    // switches:
+	g_bLight = true;
+	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_LIGHT, MF_CHECKED);
+	g_bTextured = false;
+	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_TEXTURED, MF_UNCHECKED);
+	g_bReflection = true;
+	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_REFLECTION, MF_CHECKED);
+	g_bFloor = true;
+	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_FLOOR, MF_CHECKED);
+	
+	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_FRAME, MF_CHECKED);
+	
+	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_HORIZ, MF_UNCHECKED);
+	g_bInfo = true;
+	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_INFO, MF_CHECKED);
+	g_bRegenerate = true;
+	CheckMenuItem(g_glApp.m_hMenu, ID_DATAORDER_REGENERATE, MF_CHECKED);
+	logger.AddMsg(LogMode::Success, "App's menu fixed!");
+
+	InitGL(logger);
+
+	// Create an unnamed waitable timer.
+	hTimer = CreateWaitableTimer(NULL, TRUE, NULL);
+	if (NULL == hTimer)
+		throw std::runtime_error("CreateWaitableTimer failed");
+
+	logger.AddMsg(LogMode::Success, "App initialised!");
+}
+
+/*-----------------------------------------------------------------------------+
+|                                   InitGL                                     |
++------------------------------------------------------------------------------+
+| Description:																   |
+|    Does initialization of the OpenGL                                         | 
++-----------------------------------------------------------------------------*/
+void InitGL(const CLog& logger) {
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);	
+
+	glEnable(GL_CULL_FACE);
+	
+	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+
+	glShadeModel(GL_SMOOTH);
+
+	if (CGLFont::Create2dCourierFont(&g_glApp, g_Font, 16, 8)) logger.AddMsg(LogMode::Success, "Courier Font Created!");
+	else throw std::runtime_error("Faild to create the courier font!");
+
+	// camera:
+	g_Camera.InitView(1.0f, 1000.0f, 90.0f, 1.33f);
+	g_Camera.m_fRad = 4.0f;
+	g_Camera.m_fYaw = M_PI;
+	g_Camera.m_fPitch = DegToRad(30.0f);
+
+    // set lighting:
+	glEnable(GL_LIGHT0);
+	g_Light.SetAmbientColor(0.2f, 0.2f, 0.2f);
+	g_Light.SetDiffuseColor(0.9f, 0.9f, 0.9f);
+	g_Light.SetSpecularColor(1.0f, 1.0f, 1.0f);
+	g_Light.SetPos(0.0f, 0.0f, 10.0f);
+
+	glEnable(GL_COLOR_MATERIAL);
+
+	ResizeGLScene(g_glApp.m_iWidth, g_glApp.m_iHeight);
+
+	logger.AddMsg(LogMode::Success, "OpenGL initialised!");
+}
+
+/*-----------------------------------------------------------------------------+
+|                                  CleanUp                                     |
++-----------------------------------------------------------------------------*/
+
+Niepotrzebne komentarze, nazwy zmiennych wystarczajaco opisuja co robi kod, powinny zostac usuniete
