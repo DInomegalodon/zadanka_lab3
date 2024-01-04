@@ -19,5 +19,14 @@ namespace LODOWKATEST
 
 			Assert::AreEqual(utworzony, wczytany);
 		}
+		TEST_METHOD(TestMethod2)
+		{
+			//wczytywanie z klawiatury
+
+			string nazwa_klawiatura = Wczytaj_dane_produktu();
+			Produkt test(1, 1, "maslo");
+			string nazwa_testowa = "maslo";
+			Assert::AreEqual(nazwa_testowa, nazwa_klawiatura);
+		}
 	};
 }
