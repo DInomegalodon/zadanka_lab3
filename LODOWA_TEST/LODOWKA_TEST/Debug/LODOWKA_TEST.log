@@ -1,0 +1,2 @@
+﻿  produkty.txt
+C:\Users\Majkel\source\repos\LODOWKA\LODOWKA\produkty.txt(2,1): fatal error C1010: Nieoczekiwany koniec pliku podczas wyszukiwania prekompilowanego pliku nagłówkowego. Czy zapomniano dodać „#include "pch.h"” do źródła?
